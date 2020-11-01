@@ -9,6 +9,7 @@ package txvalidator
 import (
 	"context"
 	"fmt"
+	"github.com/golang/protobuf/ptypes"
 	"time"
 
 	"github.com/golang/protobuf/proto"
@@ -93,6 +94,7 @@ type blockValidationResult struct {
 	txsUpgradedChaincode *sysccprovider.ChaincodeInstance
 	err                  error
 	txid                 string
+	timestmp	     time.Time
 }
 
 // NewTxValidator creates new transactions validator
@@ -145,6 +147,7 @@ func (v *TxValidator) Validate(block *common.Block) error {
 	txsUpgradedChaincodes := make(map[int]*sysccprovider.ChaincodeInstance)
 	// array of txids
 	txidArray := make([]string, len(block.Data.Data))
+	var blktime time.Time
 
 	results := make(chan *blockValidationResult)
 	go func() {
@@ -196,6 +199,10 @@ func (v *TxValidator) Validate(block *common.Block) error {
 				}
 				txidArray[res.tIdx] = res.txid
 			}
+
+			if res.timestmp.After(blktime){
+				blktime = res.timestmp
+			}
 		}
 	}
 
@@ -228,9 +235,14 @@ func (v *TxValidator) Validate(block *common.Block) error {
 
 	block.Metadata.Metadata[common.BlockMetadataIndex_TRANSACTIONS_FILTER] = txsfltr
 
+
+	logger.Infof("The block time is to be set as %s", blktime.String())
+	//newBlockTime,_ := ptypes.TimestampProto(blktime)
+	//block.Metadata.BlockTime = newBlockTime
+
 	elapsedValidation := time.Since(startValidation) / time.Millisecond // duration in ms
 	logger.Infof("[%s] Validated block [%d] in %dms", v.ChainID, block.Header.Number, elapsedValidation)
-	logger.Info("Check if changes reflected")
+	logger.Info("Check if changes reflected version 3")
 	return nil
 }
 
@@ -319,6 +331,8 @@ func (v *TxValidator) validateTx(req *blockValidationRequest, results chan<- *bl
 
 		channel := chdr.ChannelId
 		logger.Debugf("Transaction is for channel %s", channel)
+		t1 := chdr.Timestamp
+		t2,_ := ptypes.Timestamp(t1)
 
 		if !v.chainExists(channel) {
 			logger.Errorf("Dropping transaction for non-existent channel %s", channel)
@@ -457,6 +471,7 @@ func (v *TxValidator) validateTx(req *blockValidationRequest, results chan<- *bl
 			txsUpgradedChaincode: txsUpgradedChaincode,
 			validationCode:       peer.TxValidationCode_VALID,
 			txid:                 txID,
+			timestmp:             t2,
 		}
 		return
 	} else {
