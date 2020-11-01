@@ -23,24 +23,25 @@ import (
 
 	"github.com/hyperledger/fabric/common/util"
 	"github.com/stretchr/testify/assert"
+	bl "github.com/hyperledger/fabric/protos/common"
 )
 
 func TestBlock(t *testing.T) {
-	var block *Block
+	var block *bl.Block
 	assert.Nil(t, block.GetHeader())
 	assert.Nil(t, block.GetData())
 	assert.Nil(t, block.GetMetadata())
 
-	data := &BlockData{
+	data := &bl.BlockData{
 		Data: [][]byte{{0, 1, 2}},
 	}
-	block = NewBlock(uint64(0), []byte("datahash"))
+	block = bl.NewBlock(uint64(0), []byte("datahash"))
 	assert.Equal(t, []byte("datahash"), block.Header.PreviousHash, "Incorrect previous hash")
 	assert.NotNil(t, block.GetData())
 	assert.NotNil(t, block.GetMetadata())
 	block.GetHeader().DataHash = data.Hash()
 
-	asn1Bytes, err := asn1.Marshal(asn1Header{
+	asn1Bytes, err := asn1.Marshal(bl.Asn1Header{
 		Number:       int64(uint64(0)),
 		DataHash:     data.Hash(),
 		PreviousHash: []byte("datahash"),
@@ -53,7 +54,7 @@ func TestBlock(t *testing.T) {
 }
 
 func TestGoodBlockHeaderBytes(t *testing.T) {
-	goodBlockHeader := &BlockHeader{
+	goodBlockHeader := &bl.BlockHeader{
 		Number:       1,
 		PreviousHash: []byte("foo"),
 		DataHash:     []byte("bar"),
@@ -69,7 +70,7 @@ func TestBadBlockHeaderBytes(t *testing.T) {
 		}
 	}()
 
-	badBlockHeader := &BlockHeader{
+	badBlockHeader := &bl.BlockHeader{
 		Number:       math.MaxUint64,
 		PreviousHash: []byte("foo"),
 		DataHash:     []byte("bar"),

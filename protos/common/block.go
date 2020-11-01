@@ -19,8 +19,9 @@ package common
 import (
 	"encoding/asn1"
 	"fmt"
+	google_protobuf "github.com/golang/protobuf/ptypes/timestamp"
 	"math"
-
+ 
 	"github.com/hyperledger/fabric/common/util"
 )
 
@@ -36,12 +37,12 @@ func NewBlock(seqNum uint64, previousHash []byte) *Block {
 	for i := 0; i < len(BlockMetadataIndex_name); i++ {
 		metadataContents = append(metadataContents, []byte{})
 	}
-	block.Metadata = &BlockMetadata{Metadata: metadataContents}
+	block.Metadata = &BlockMetadata{Metadata: metadataContents, BlockTime: &google_protobuf.Timestamp{},}
 
 	return block
 }
 
-type asn1Header struct {
+type Asn1Header struct {
 	Number       int64
 	PreviousHash []byte
 	DataHash     []byte
@@ -49,7 +50,7 @@ type asn1Header struct {
 
 // Bytes returns the ASN.1 marshaled representation of the block header.
 func (b *BlockHeader) Bytes() []byte {
-	asn1Header := asn1Header{
+	asn1Header := Asn1Header{
 		PreviousHash: b.PreviousHash,
 		DataHash:     b.DataHash,
 	}

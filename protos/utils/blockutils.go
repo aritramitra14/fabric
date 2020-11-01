@@ -10,6 +10,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	cb "github.com/hyperledger/fabric/protos/common"
 	"github.com/pkg/errors"
+	google_protobuf "github.com/golang/protobuf/ptypes/timestamp"
 )
 
 // GetChainIDFromBlockBytes returns chain ID given byte array which represents
@@ -115,7 +116,7 @@ func CopyBlockMetadata(src *cb.Block, dst *cb.Block) {
 // InitBlockMetadata copies metadata from one block into another
 func InitBlockMetadata(block *cb.Block) {
 	if block.Metadata == nil {
-		block.Metadata = &cb.BlockMetadata{Metadata: [][]byte{{}, {}, {}, {}, {}}}
+		block.Metadata = &cb.BlockMetadata{Metadata: [][]byte{{}, {}, {}, {}, {}}, BlockTime: &google_protobuf.Timestamp{},}
 	} else if len(block.Metadata.Metadata) < int(cb.BlockMetadataIndex_COMMIT_HASH+1) {
 		for i := int(len(block.Metadata.Metadata)); i <= int(cb.BlockMetadataIndex_COMMIT_HASH); i++ {
 			block.Metadata.Metadata = append(block.Metadata.Metadata, []byte{})

@@ -230,7 +230,7 @@ func (v *TxValidator) Validate(block *common.Block) error {
 
 	elapsedValidation := time.Since(startValidation) / time.Millisecond // duration in ms
 	logger.Infof("[%s] Validated block [%d] in %dms", v.ChainID, block.Header.Number, elapsedValidation)
-
+	logger.Info("Check if changes reflected")
 	return nil
 }
 

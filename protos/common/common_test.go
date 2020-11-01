@@ -8,14 +8,14 @@ package common
 
 import (
 	"testing"
-
+	cb "github.com/hyperledger/fabric/protos/common"
 	"github.com/golang/protobuf/proto"
 	google_protobuf "github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCommonEnums(t *testing.T) {
-	var status Status
+	var status cb.Status
 
 	status = 0
 	assert.Equal(t, "UNKNOWN", status.String())
@@ -35,7 +35,7 @@ func TestCommonEnums(t *testing.T) {
 	assert.Equal(t, "SERVICE_UNAVAILABLE", status.String())
 	_, _ = status.EnumDescriptor()
 
-	var header HeaderType
+	var header cb.HeaderType
 	header = 0
 	assert.Equal(t, "MESSAGE", header.String())
 	header = 1
@@ -52,7 +52,7 @@ func TestCommonEnums(t *testing.T) {
 	assert.Equal(t, "CHAINCODE_PACKAGE", header.String())
 	_, _ = header.EnumDescriptor()
 
-	var index BlockMetadataIndex
+	var index cb.BlockMetadataIndex
 	index = 0
 	assert.Equal(t, "SIGNATURES", index.String())
 	index = 1
@@ -65,10 +65,10 @@ func TestCommonEnums(t *testing.T) {
 }
 
 func TestCommonStructs(t *testing.T) {
-	var last *LastConfig
+	var last *cb.LastConfig
 	last = nil
 	assert.Equal(t, uint64(0), last.GetIndex())
-	last = &LastConfig{
+	last = &cb.LastConfig{
 		Index: uint64(1),
 	}
 	assert.Equal(t, uint64(1), last.GetIndex())
@@ -78,13 +78,13 @@ func TestCommonStructs(t *testing.T) {
 	_ = last.String()
 	last.ProtoMessage()
 
-	var meta *Metadata
+	var meta *cb.Metadata
 	meta = nil
 	assert.Nil(t, meta.GetSignatures())
 	assert.Nil(t, meta.GetValue())
-	meta = &Metadata{
+	meta = &cb.Metadata{
 		Value:      []byte("value"),
-		Signatures: []*MetadataSignature{{}},
+		Signatures: []*cb.MetadataSignature{{}},
 	}
 	assert.NotNil(t, meta.GetSignatures())
 	assert.NotNil(t, meta.GetValue())
@@ -94,11 +94,11 @@ func TestCommonStructs(t *testing.T) {
 	_ = meta.String()
 	meta.ProtoMessage()
 
-	var sig *MetadataSignature
+	var sig *cb.MetadataSignature
 	sig = nil
 	assert.Nil(t, sig.GetSignature())
 	assert.Nil(t, sig.GetSignatureHeader())
-	sig = &MetadataSignature{
+	sig = &cb.MetadataSignature{
 		SignatureHeader: []byte("header"),
 		Signature:       []byte("signature"),
 	}
@@ -111,11 +111,11 @@ func TestCommonStructs(t *testing.T) {
 	_ = sig.String()
 	sig.ProtoMessage()
 
-	var header *Header
+	var header *cb.Header
 	header = nil
 	assert.Nil(t, header.GetChannelHeader())
 	assert.Nil(t, header.GetSignatureHeader())
-	header = &Header{
+	header = &cb.Header{
 		ChannelHeader:   []byte("channel header"),
 		SignatureHeader: []byte("signature header"),
 	}
@@ -128,7 +128,7 @@ func TestCommonStructs(t *testing.T) {
 	_ = header.String()
 	header.ProtoMessage()
 
-	var chheader *ChannelHeader
+	var chheader *cb.ChannelHeader
 	chheader = nil
 	assert.Equal(t, "", chheader.GetChannelId())
 	assert.Equal(t, "", chheader.GetTxId())
@@ -137,7 +137,7 @@ func TestCommonStructs(t *testing.T) {
 	assert.Equal(t, int32(0), chheader.GetVersion())
 	assert.Nil(t, chheader.GetExtension())
 	assert.Nil(t, chheader.GetTimestamp())
-	chheader = &ChannelHeader{
+	chheader = &cb.ChannelHeader{
 		ChannelId: "ChannelId",
 		TxId:      "TxId",
 		Timestamp: &google_protobuf.Timestamp{},
@@ -156,11 +156,11 @@ func TestCommonStructs(t *testing.T) {
 	_ = chheader.String()
 	chheader.ProtoMessage()
 
-	var sigheader *SignatureHeader
+	var sigheader *cb.SignatureHeader
 	sigheader = nil
 	assert.Nil(t, sigheader.GetCreator())
 	assert.Nil(t, sigheader.GetNonce())
-	sigheader = &SignatureHeader{
+	sigheader = &cb.SignatureHeader{
 		Creator: []byte("creator"),
 		Nonce:   []byte("nonce"),
 	}
@@ -172,12 +172,12 @@ func TestCommonStructs(t *testing.T) {
 	_ = sigheader.String()
 	sigheader.ProtoMessage()
 
-	var payload *Payload
+	var payload *cb.Payload
 	payload = nil
 	assert.Nil(t, payload.GetHeader())
 	assert.Nil(t, payload.GetData())
-	payload = &Payload{
-		Header: &Header{},
+	payload = &cb.Payload{
+		Header: &cb.Header{},
 		Data:   []byte("data"),
 	}
 	assert.NotNil(t, payload.GetHeader())
@@ -188,11 +188,11 @@ func TestCommonStructs(t *testing.T) {
 	_ = payload.String()
 	payload.ProtoMessage()
 
-	var env *Envelope
+	var env *cb.Envelope
 	env = nil
 	assert.Nil(t, env.GetPayload())
 	assert.Nil(t, env.GetSignature())
-	env = &Envelope{
+	env = &cb.Envelope{
 		Payload:   []byte("payload"),
 		Signature: []byte("signature"),
 	}
@@ -204,8 +204,8 @@ func TestCommonStructs(t *testing.T) {
 	_ = env.String()
 	env.ProtoMessage()
 
-	b := &Block{
-		Data: &BlockData{},
+	b := &cb.Block{
+		Data: &cb.BlockData{},
 	}
 	b.Reset()
 	assert.Nil(t, b.GetData())
@@ -213,12 +213,12 @@ func TestCommonStructs(t *testing.T) {
 	_ = b.String()
 	b.ProtoMessage()
 
-	var bh *BlockHeader
+	var bh *cb.BlockHeader
 	bh = nil
 	assert.Nil(t, bh.GetDataHash())
 	assert.Nil(t, bh.GetPreviousHash())
 	assert.Equal(t, uint64(0), bh.GetNumber())
-	bh = &BlockHeader{
+	bh = &cb.BlockHeader{
 		PreviousHash: []byte("hash"),
 		DataHash:     []byte("dataHash"),
 		Number:       uint64(1),
@@ -232,10 +232,10 @@ func TestCommonStructs(t *testing.T) {
 	_ = bh.String()
 	bh.ProtoMessage()
 
-	var bd *BlockData
+	var bd *cb.BlockData
 	bd = nil
 	assert.Nil(t, bd.GetData())
-	bd = &BlockData{
+	bd = &cb.BlockData{
 		Data: [][]byte{},
 	}
 	assert.NotNil(t, bd.GetData())
@@ -245,15 +245,19 @@ func TestCommonStructs(t *testing.T) {
 	_ = bd.String()
 	bd.ProtoMessage()
 
-	var bm *BlockMetadata
+	var bm *cb.BlockMetadata
 	bm = nil
 	assert.Nil(t, bm.GetMetadata())
-	bm = &BlockMetadata{
+	assert.Nil(t, bm.GetBlockTime())
+	bm = &cb.BlockMetadata{
 		Metadata: [][]byte{},
+		BlockTime: &google_protobuf.Timestamp{},
 	}
 	assert.NotNil(t, bm.GetMetadata())
+	assert.NotNil(t, bm.GetBlockTime())
 	bm.Reset()
 	assert.Nil(t, bm.GetMetadata())
+	assert.Nil(t, bm.GetBlockTime())
 	_, _ = bm.Descriptor()
 	_ = bm.String()
 	bm.ProtoMessage()
@@ -262,15 +266,15 @@ func TestCommonStructs(t *testing.T) {
 
 func TestCommonProtolator(t *testing.T) {
 	// Envelope
-	env := &Envelope{}
+	env := &cb.Envelope{}
 	assert.Equal(t, []string{"payload"}, env.StaticallyOpaqueFields())
 	msg, err := env.StaticallyOpaqueFieldProto("badproto")
 	assert.Nil(t, msg)
 	assert.Error(t, err)
 	msg, err = env.StaticallyOpaqueFieldProto("payload")
 	// Payload
-	payload := &Payload{}
-	assert.Equal(t, &Payload{}, msg)
+	payload := &cb.Payload{}
+	assert.Equal(t, &cb.Payload{}, msg)
 	assert.NoError(t, err)
 	assert.Equal(t, []string{"data"}, payload.VariablyOpaqueFields())
 	msg, err = payload.VariablyOpaqueFieldProto("badproto")
@@ -280,8 +284,8 @@ func TestCommonProtolator(t *testing.T) {
 	assert.Nil(t, msg)
 	assert.Error(t, err)
 
-	payload = &Payload{
-		Header: &Header{
+	payload = &cb.Payload{
+		Header: &cb.Header{
 			ChannelHeader: []byte("badbytes"),
 		},
 	}
@@ -289,38 +293,38 @@ func TestCommonProtolator(t *testing.T) {
 	assert.Nil(t, msg)
 	assert.Error(t, err)
 
-	ch := &ChannelHeader{
-		Type: int32(HeaderType_CONFIG),
+	ch := &cb.ChannelHeader{
+		Type: int32(cb.HeaderType_CONFIG),
 	}
 	chbytes, _ := proto.Marshal(ch)
-	payload = &Payload{
-		Header: &Header{
+	payload = &cb.Payload{
+		Header: &cb.Header{
 			ChannelHeader: chbytes,
 		},
 	}
 	msg, err = payload.VariablyOpaqueFieldProto("data")
-	assert.Equal(t, &ConfigEnvelope{}, msg)
+	assert.Equal(t, &cb.ConfigEnvelope{}, msg)
 	assert.NoError(t, err)
 
-	ch = &ChannelHeader{
-		Type: int32(HeaderType_CONFIG_UPDATE),
+	ch = &cb.ChannelHeader{
+		Type: int32(cb.HeaderType_CONFIG_UPDATE),
 	}
 	chbytes, _ = proto.Marshal(ch)
-	payload = &Payload{
-		Header: &Header{
+	payload = &cb.Payload{
+		Header: &cb.Header{
 			ChannelHeader: chbytes,
 		},
 	}
 	msg, err = payload.VariablyOpaqueFieldProto("data")
-	assert.Equal(t, &ConfigUpdateEnvelope{}, msg)
+	assert.Equal(t, &cb.ConfigUpdateEnvelope{}, msg)
 	assert.NoError(t, err)
 
-	ch = &ChannelHeader{
-		Type: int32(HeaderType_CHAINCODE_PACKAGE),
+	ch = &cb.ChannelHeader{
+		Type: int32(cb.HeaderType_CHAINCODE_PACKAGE),
 	}
 	chbytes, _ = proto.Marshal(ch)
-	payload = &Payload{
-		Header: &Header{
+	payload = &cb.Payload{
+		Header: &cb.Header{
 			ChannelHeader: chbytes,
 		},
 	}
@@ -329,7 +333,7 @@ func TestCommonProtolator(t *testing.T) {
 	assert.Error(t, err)
 
 	// Header
-	var header *Header
+	var header *cb.Header
 	assert.Equal(t, []string{"channel_header", "signature_header"},
 		header.StaticallyOpaqueFields())
 
@@ -338,22 +342,22 @@ func TestCommonProtolator(t *testing.T) {
 	assert.Error(t, err)
 
 	msg, err = header.StaticallyOpaqueFieldProto("channel_header")
-	assert.Equal(t, &ChannelHeader{}, msg)
+	assert.Equal(t, &cb.ChannelHeader{}, msg)
 	assert.NoError(t, err)
 
 	msg, err = header.StaticallyOpaqueFieldProto("signature_header")
-	assert.Equal(t, &SignatureHeader{}, msg)
+	assert.Equal(t, &cb.SignatureHeader{}, msg)
 	assert.NoError(t, err)
 
 	// BlockData
-	var bd *BlockData
+	var bd *cb.BlockData
 	assert.Equal(t, []string{"data"}, bd.StaticallyOpaqueSliceFields())
 
 	msg, err = bd.StaticallyOpaqueSliceFieldProto("badslice", 0)
 	assert.Nil(t, msg)
 	assert.Error(t, err)
 	msg, err = bd.StaticallyOpaqueSliceFieldProto("data", 0)
-	assert.Equal(t, &Envelope{}, msg)
+	assert.Equal(t, &cb.Envelope{}, msg)
 	assert.NoError(t, err)
 
 }
