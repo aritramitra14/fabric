@@ -237,12 +237,12 @@ func (v *TxValidator) Validate(block *common.Block) error {
 
 
 	logger.Infof("The block time is to be set as %s", blktime.String())
-	//newBlockTime,_ := ptypes.TimestampProto(blktime)
-	//block.Metadata.BlockTime = newBlockTime
+	newBlockTime,_ := ptypes.TimestampProto(blktime)
+	block.Metadata.BlockTime = newBlockTime
 
 	elapsedValidation := time.Since(startValidation) / time.Millisecond // duration in ms
 	logger.Infof("[%s] Validated block [%d] in %dms", v.ChainID, block.Header.Number, elapsedValidation)
-	logger.Info("Check if changes reflected version 3")
+	logger.Info("Check if changes reflected version 4")
 	return nil
 }
 

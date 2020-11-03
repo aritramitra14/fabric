@@ -8,6 +8,7 @@ package kvledger
 
 import (
 	"fmt"
+	"github.com/golang/protobuf/ptypes"
 	"sync"
 	"time"
 
@@ -428,13 +429,19 @@ func (l *kvLedger) CommitWithPvtData(pvtdataAndBlock *ledger.BlockAndPvtData, co
 		}
 	}
 
-	logger.Infof("[%s] Committed block [%d] with %d transaction(s) in %dms (state_validation=%dms block_and_pvtdata_commit=%dms state_commit=%dms)"+
+	valTime, err1 := ptypes.Timestamp(block.Metadata.BlockTime)
+	if err1!= nil{
+		logger.Info("Problem with block metadata")
+	}
+
+	logger.Infof("[%s] Committed block [%d] with %d transaction(s) in %dms (state_validation=%dms block_and_pvtdata_commit=%dms state_commit=%dms) with blocktime as %s"+
 		" commitHash=[%x]",
 		l.ledgerID, block.Header.Number, len(block.Data.Data),
 		time.Since(startBlockProcessing)/time.Millisecond,
 		elapsedBlockProcessing/time.Millisecond,
 		elapsedBlockstorageAndPvtdataCommit/time.Millisecond,
 		elapsedCommitState/time.Millisecond,
+		valTime.String(),
 		l.commitHash,
 	)
 	l.updateBlockStats(
