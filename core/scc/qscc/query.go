@@ -8,7 +8,9 @@ package qscc
 
 import (
 	"fmt"
+	"github.com/golang/protobuf/ptypes"
 	"strconv"
+	//"time"
 
 	"github.com/hyperledger/fabric/common/flogging"
 	"github.com/hyperledger/fabric/core/aclmgmt"
@@ -189,12 +191,38 @@ func getChainInfo(vledger ledger.PeerLedger) pb.Response {
 	if err != nil {
 		return shim.Error(fmt.Sprintf("Failed to get block info with error %s", err))
 	}
-	bytes, err := utils.Marshal(binfo)
-	if err != nil {
-		return shim.Error(err.Error())
+	ht := binfo.Height - 1
+	blk, err2 := vledger.GetBlockByNumber(ht)
+	if err2 !=nil {
+		return shim.Error("Failed to fetch block")
 	}
 
-	return shim.Success(bytes)
+	time1 := blk.GetMetadata().GetBlockTime()
+	if time1 == nil{
+		return shim.Error("Problem with time")
+	}
+
+	//if num == nil{
+	//	return shim.Error("Problem with block header")
+	//}
+
+	//qscclogger.Infof("The block header number is %d",num)
+
+
+
+	//if (blk.Metadata.BlockTime)==nil{
+	//	qscclogger.Info("No block time")
+	//}
+	time2,_ := ptypes.Timestamp(time1)
+	time3 := time2.String()
+
+	//bytes, err := utils.Marshal(binfo)
+	//if err != nil {
+	//	return shim.Error(err.Error())
+	//}
+	//res := strconv.Itoa(int(ht))
+	//num2 := int(num)
+	return shim.Success([]byte(time3))
 }
 
 func getBlockByTxID(vledger ledger.PeerLedger, rawTxID []byte) pb.Response {

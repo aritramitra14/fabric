@@ -242,7 +242,7 @@ func (v *TxValidator) Validate(block *common.Block) error {
 
 	elapsedValidation := time.Since(startValidation) / time.Millisecond // duration in ms
 	logger.Infof("[%s] Validated block [%d] in %dms", v.ChainID, block.Header.Number, elapsedValidation)
-	logger.Info("Check if changes reflected version 4")
+	//logger.Info("Check if changes reflected version 4")
 	return nil
 }
 
@@ -333,6 +333,7 @@ func (v *TxValidator) validateTx(req *blockValidationRequest, results chan<- *bl
 		logger.Debugf("Transaction is for channel %s", channel)
 		t1 := chdr.Timestamp
 		t2,_ := ptypes.Timestamp(t1)
+		logger.Infof("Txn time is %s", t2.String())
 
 		if !v.chainExists(channel) {
 			logger.Errorf("Dropping transaction for non-existent channel %s", channel)

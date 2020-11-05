@@ -7,10 +7,12 @@ package fsblkstorage
 
 import (
 	"github.com/golang/protobuf/proto"
+	"github.com/golang/protobuf/ptypes"
 	ledgerutil "github.com/hyperledger/fabric/common/ledger/util"
 	"github.com/hyperledger/fabric/protos/common"
 	"github.com/hyperledger/fabric/protos/utils"
 	"github.com/pkg/errors"
+	"time"
 )
 
 type serializedBlockInfo struct {
@@ -128,6 +130,16 @@ func addMetadataBytes(blockMetadata *common.BlockMetadata, buf *proto.Buffer) er
 			return errors.Wrap(err, "error encoding the block metadata")
 		}
 	}
+	var t1 time.Time
+	t1,err1 := ptypes.Timestamp(blockMetadata.BlockTime)
+	if err1!= nil{
+		logger.Info("Problem with block metadata")
+	}
+	t2:= uint64(t1.UnixNano())
+	err3 := buf.EncodeVarint(t2)
+	if err3 !=nil{
+		return errors.Wrap(err1, "Problem encoding block metadata" )
+	}
 	return nil
 }
 
@@ -191,5 +203,21 @@ func extractMetadata(buf *ledgerutil.Buffer) (*common.BlockMetadata, error) {
 		}
 		metadata.Metadata = append(metadata.Metadata, metadataEntry)
 	}
+
+	t3,err := buf.DecodeVarint()
+	if err!=nil{
+		return nil,errors.Wrap(err,"error in decoding t3")
+	}
+	t4:= int64(t3)
+	t5:= time.Unix(0,t4)
+	t6,err5:=ptypes.TimestampProto(t5)
+	if err5 !=nil{
+		return nil,errors.Wrap(err5, "error in converting")
+	}
+
+	metadata.BlockTime = t6
+
+
+
 	return metadata, nil
 }
