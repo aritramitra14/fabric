@@ -8,6 +8,7 @@ package chaincode
 
 import (
 	"fmt"
+	"github.com/golang/protobuf/ptypes"
 	"io"
 	"strconv"
 	"strings"
@@ -231,6 +232,8 @@ func (h *Handler) handleMessageReadyState(msg *pb.ChaincodeMessage) error {
 		go h.HandleTransaction(msg, h.HandleGetStateMetadata)
 	case pb.ChaincodeMessage_PUT_STATE_METADATA:
 		go h.HandleTransaction(msg, h.HandlePutStateMetadata)
+	case pb.ChaincodeMessage_GET_TIMENOW:
+		go h.HandleTransaction(msg, h.HandleGetTimeNow)
 	default:
 		return fmt.Errorf("[%s] Fabric side handler cannot handle message (%s) while in ready state", msg.Txid, msg.Type)
 	}
@@ -957,6 +960,44 @@ func (h *Handler) HandleGetHistoryForKey(msg *pb.ChaincodeMessage, txContext *Tr
 	chaincodeLogger.Debugf("Got keys and values. Sending %s", pb.ChaincodeMessage_RESPONSE)
 	return &pb.ChaincodeMessage{Type: pb.ChaincodeMessage_RESPONSE, Payload: payloadBytes, Txid: msg.Txid, ChannelId: msg.ChannelId}, nil
 }
+
+func (h *Handler) HandleGetTimeNow(msg *pb.ChaincodeMessage, txContext *TransactionContext) (*pb.ChaincodeMessage, error) {
+	getTimeNow := &pb.GetTimenow{}
+	err := proto.Unmarshal(msg.Payload, getTimeNow)
+	if err != nil {
+		return nil, errors.Wrap(err, "unmarshal failed")
+	}
+
+	var vledger ledger.PeerLedger
+	vledger = h.LedgerGetter.GetLedger(txContext.ChainID)
+	if vledger == nil {
+		return nil, errors.Errorf("failed to find ledger for channel: %s", txContext.ChainID)
+	}
+	binfo,err := vledger.GetBlockchainInfo()
+	if err != nil {
+		return nil, errors.Errorf("Failed to get block info with error %s", err)
+	}
+	ht := binfo.Height - 1
+	blk, err2 := vledger.GetBlockByNumber(ht)
+	if err2 !=nil {
+		return nil, errors.Wrap(err2,"Failed to fetch block")
+	}
+
+	time1 := blk.GetMetadata().GetBlockTime()
+	if time1 == nil{
+		return nil, errors.New("Problem with time")
+	}
+
+	time2,_ := ptypes.Timestamp(time1)
+	res,_ := time2.MarshalBinary()
+
+	// Send response msg back to chaincode. GetState will not trigger event
+	return &pb.ChaincodeMessage{Type: pb.ChaincodeMessage_RESPONSE, Payload: res, Txid: msg.Txid, ChannelId: msg.ChannelId}, nil
+}
+
+
+
+
 
 func isCollectionSet(collection string) bool {
 	return collection != ""

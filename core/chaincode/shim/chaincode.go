@@ -713,7 +713,18 @@ func (stub *ChaincodeStub) GetHistoryForKey(key string) (HistoryQueryIteratorInt
 		return nil, err
 	}
 	return &HistoryQueryIterator{CommonIterator: &CommonIterator{stub.handler, stub.ChannelId, stub.TxID, response, 0}}, nil
+
 }
+
+
+func (stub *ChaincodeStub) GetTimenow() ([]byte, error) {
+	// Access public data by setting the collection to empty string
+	//collection := ""
+	return stub.handler.handleGetTimenow(stub.ChannelId, stub.TxID)
+}
+
+
+
 
 //CreateCompositeKey documentation can be found in interfaces.go
 func (stub *ChaincodeStub) CreateCompositeKey(objectType string, attributes []string) (string, error) {
