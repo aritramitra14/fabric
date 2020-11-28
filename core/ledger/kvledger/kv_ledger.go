@@ -47,6 +47,7 @@ type kvLedger struct {
 	blockAPIsRWLock        *sync.RWMutex
 	stats                  *ledgerStats
 	commitHash             []byte
+	prevTime	       time.Time
 }
 
 // NewKVLedger constructs new `KVLedger`
@@ -64,7 +65,7 @@ func newKVLedger(
 	logger.Debugf("Creating KVLedger ledgerID=%s: ", ledgerID)
 	// Create a kvLedger for this chain/ledger, which encasulates the underlying
 	// id store, blockstore, txmgr (state database), history database
-	l := &kvLedger{ledgerID: ledgerID, blockStore: blockStore, historyDB: historyDB, blockAPIsRWLock: &sync.RWMutex{}}
+	l := &kvLedger{ledgerID: ledgerID, blockStore: blockStore, historyDB: historyDB, blockAPIsRWLock: &sync.RWMutex{}, prevTime: time.Time{}}
 
 	// Retrieves the current commit hash from the blockstore
 	var err error
@@ -367,6 +368,21 @@ func (l *kvLedger) CommitWithPvtData(pvtdataAndBlock *ledger.BlockAndPvtData, co
 	var err error
 	block := pvtdataAndBlock.Block
 	blockNo := pvtdataAndBlock.Block.Header.Number
+	//logger.Infof("The current block no is %d",blockNo)
+	//logger.Infof("The previous block time set is %s",l.prevTime.String())
+	newBlockTime, err4 := ptypes.Timestamp(block.Metadata.BlockTime)
+	if err4 != nil{
+		logger.Info("Problem with current block metadata")
+	}
+	//logger.Infof("The current block time is %s", newBlockTime.String())
+	if (l.prevTime.After(newBlockTime)){
+		logger.Info("Blocktime correction initiated")
+		correction, err5 := ptypes.TimestampProto(l.prevTime)
+		if err5 != nil{
+			logger.Info("Problem in conversion")
+		}
+		pvtdataAndBlock.Block.Metadata.BlockTime = correction
+	}
 
 	startBlockProcessing := time.Now()
 	if commitOpts.FetchPvtDataFromLedger {
@@ -433,6 +449,8 @@ func (l *kvLedger) CommitWithPvtData(pvtdataAndBlock *ledger.BlockAndPvtData, co
 	if err1!= nil{
 		logger.Info("Problem with block metadata")
 	}
+
+	l.prevTime = valTime
 
 	logger.Infof("[%s] Committed block [%d] with %d transaction(s) in %dms (state_validation=%dms block_and_pvtdata_commit=%dms state_commit=%dms) with blocktime as %s"+
 		" commitHash=[%x]",
