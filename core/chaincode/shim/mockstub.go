@@ -301,6 +301,13 @@ func (stub *MockStub) GetTimenow() ([]byte, error) {
 	return nil, errors.New("not implemented")
 }
 
+
+func (stub *MockStub) GetStateWindow(key string, timeDuration int64) (StateQueryIteratorInterface, error) {
+	return nil, errors.New("not implemented")
+}
+
+
+
 //GetStateByPartialCompositeKey function can be invoked by a chaincode to query the
 //state based on a given partial composite key. This function returns an
 //iterator which can be used to iterate over all composite keys whose prefix

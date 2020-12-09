@@ -15,6 +15,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -722,6 +723,48 @@ func (stub *ChaincodeStub) GetTimenow() ([]byte, error) {
 	//collection := ""
 	return stub.handler.handleGetTimenow(stub.ChannelId, stub.TxID)
 }
+
+
+func (stub *ChaincodeStub) GetStateWindow(startKey string, timeDuration int64) (StateQueryIteratorInterface, error) {
+	if startKey == "" {
+		startKey = emptyKeySubstitute
+	}
+	//if err := validateSimpleKeys(startKey, endKey); err != nil {
+	//	return nil, err
+	//}
+	collection := ""
+
+	// ignore QueryResponseMetadata as it is not applicable for a range query without pagination
+
+	t1, err1 := stub.handler.handleGetTimenow(stub.ChannelId, stub.TxID)
+	if  err1 != nil {
+		return nil, err1
+	}
+	var x time.Time
+	err2 := x.UnmarshalBinary(t1)
+	if  err2 != nil {
+		return nil, err2
+	}
+	startTime := x.UnixNano()/int64(time.Millisecond)
+	endTime := startTime - timeDuration
+	newEndKey := startKey+ strconv.FormatInt(startTime,10)
+	newStartKey := startKey + strconv.FormatInt(endTime,10)
+
+	iterator, _, err := stub.handleGetStateByRange(collection, newStartKey, newEndKey, nil)
+
+	return iterator, err
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 
