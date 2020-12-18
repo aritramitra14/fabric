@@ -504,6 +504,11 @@ func (l *kvLedger) GetCount() (int , error){
 	return l.cacheDB.GetCount(), nil
 }
 
+
+func (l *kvLedger) GetHistory(k1 string, k2 string) ([][]byte , error){
+	return l.cacheDB.GetHistory(k1,k2), nil
+}
+
 // GetMissingPvtDataInfoForMostRecentBlocks returns the missing private data information for the
 // most recent `maxBlock` blocks which miss at least a private data of a eligible collection.
 func (l *kvLedger) GetMissingPvtDataInfoForMostRecentBlocks(maxBlock int) (ledger.MissingPvtDataInfo, error) {

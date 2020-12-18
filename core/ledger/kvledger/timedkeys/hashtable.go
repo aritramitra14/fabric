@@ -80,7 +80,7 @@ func (tk *TimedKeys) Commit(block *common.Block) error{
 }
 
 
-func (tk *TimedKeys) GetHistory(sk string, ek string) [][]byte{
+func (tk *TimedKeys) GetHistory(sk string, ek string) [][]byte {
 
 	res :=  make([][]byte,0)
 

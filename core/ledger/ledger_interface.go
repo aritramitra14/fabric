@@ -104,6 +104,8 @@ type PeerLedger interface {
 	DoesPvtDataInfoExist(blockNum uint64) (bool, error)
 
 	GetCount() (int, error)
+
+	GetHistory(k1 string, k2 string) ([][]byte, error)
 }
 
 // SimpleQueryExecutor encapsulates basic functions

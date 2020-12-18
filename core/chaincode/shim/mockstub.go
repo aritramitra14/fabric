@@ -302,13 +302,18 @@ func (stub *MockStub) GetTimenow() ([]byte, error) {
 }
 
 
-func (stub *MockStub) GetStateWindow(key string, timeDuration int64) (StateQueryIteratorInterface, error) {
+/*func (stub *MockStub) GetStateWindow(key string, timeDuration int64) (StateQueryIteratorInterface, error) {
 	return nil, errors.New("not implemented")
-}
+}*/
 
 func (stub *MockStub) GetCount() ([]byte, error) {
         return nil, errors.New("not implemented")
 }
+
+func (stub *MockStub) GetStateWindow(key string, timeDuration int64) ([][]byte , error) {
+        return nil, errors.New("not implemented")
+}
+
 
 
 

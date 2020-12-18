@@ -774,6 +774,40 @@ func (handler *Handler) handleGetCount(channelId string, txid string) ([]byte, e
 }
 
 
+func (handler *Handler) handleGetTimeHistoryRange(startkey string, endkey string, channelId string, txid string) ([][]byte, error) {
+	// Construct payload for GET_STATE
+	payloadBytes, _ := proto.Marshal(&pb.GetTimeHistoryRange{StartKey: startkey, EndKey: endkey})
+
+	msg := &pb.ChaincodeMessage{Type: pb.ChaincodeMessage_GET_TIME_HISTORY_RANGE, Payload: payloadBytes, Txid: txid, ChannelId: channelId}
+	chaincodeLogger.Debugf("[%s] Sending %s", shorttxid(msg.Txid), pb.ChaincodeMessage_GET_TIME_HISTORY_RANGE)
+
+	responseMsg, err := handler.callPeerWithChaincodeMsg(msg, channelId, txid)
+	if err != nil {
+		return nil, errors.WithMessage(err, fmt.Sprintf("[%s] error sending GET_TIMENOW", shorttxid(txid)))
+	}
+
+	if responseMsg.Type.String() == pb.ChaincodeMessage_RESPONSE.String() {
+		getTimeHistoryRangeResponse := &pb.ResultSet{}
+		if err = proto.Unmarshal(responseMsg.Payload, getTimeHistoryRangeResponse); err != nil {
+			chaincodeLogger.Errorf("[%s] unmarshall error", shorttxid(responseMsg.Txid))
+			return nil, errors.Errorf("[%s] unmarshal error", shorttxid(responseMsg.Txid))
+		}
+		// Success response
+		chaincodeLogger.Debugf("[%s] GetTimeHistory received payload %s", shorttxid(responseMsg.Txid), pb.ChaincodeMessage_RESPONSE)
+		return getTimeHistoryRangeResponse.States, nil
+	}
+	if responseMsg.Type.String() == pb.ChaincodeMessage_ERROR.String() {
+		// Error response
+		chaincodeLogger.Errorf("[%s] GetTimeHistory received error %s", shorttxid(responseMsg.Txid), pb.ChaincodeMessage_ERROR)
+		return nil, errors.New("Nothing found")
+	}
+
+	// Incorrect chaincode message received
+	chaincodeLogger.Errorf("[%s] Incorrect chaincode message %s received. Expecting %s or %s", shorttxid(responseMsg.Txid), responseMsg.Type, pb.ChaincodeMessage_RESPONSE, pb.ChaincodeMessage_ERROR)
+	return nil, errors.Errorf("[%s] incorrect chaincode message %s received. Expecting %s or %s", shorttxid(responseMsg.Txid), responseMsg.Type, pb.ChaincodeMessage_RESPONSE, pb.ChaincodeMessage_ERROR)
+}
+
+
 
 
 

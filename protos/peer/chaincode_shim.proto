@@ -41,6 +41,9 @@ message ChaincodeMessage {
         GET_PRIVATE_DATA_HASH = 22;
 	GET_TIMENOW = 23;
 	GET_COUNT = 24;
+	GET_TIME_HISTORY_RANGE = 25;
+	RESULT_SET = 26;
+	
     }
 
     Type type = 1;
@@ -184,6 +187,20 @@ message GetTimenow {
 message GetCount {
 
 }
+
+
+message GetTimeHistoryRange {
+	string startKey = 1;
+	string endKey = 2;
+
+}
+
+
+message ResultSet {
+	repeated bytes states = 1;
+	
+}
+
 
 // Interface that provides support to chaincode execution. ChaincodeContext
 // provides the context necessary for the server to respond appropriately.
