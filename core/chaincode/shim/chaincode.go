@@ -757,7 +757,11 @@ func (stub *ChaincodeStub) GetStateWindow(startKey string, timeDuration int64) (
 
 
 
-
+func (stub *ChaincodeStub) GetCount() ([]byte, error) {
+	// Access public data by setting the collection to empty string
+	//collection := ""
+	return stub.handler.handleGetCount(stub.ChannelId, stub.TxID)
+}
 
 
 

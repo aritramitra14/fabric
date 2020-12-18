@@ -306,6 +306,10 @@ func (stub *MockStub) GetStateWindow(key string, timeDuration int64) (StateQuery
 	return nil, errors.New("not implemented")
 }
 
+func (stub *MockStub) GetCount() ([]byte, error) {
+        return nil, errors.New("not implemented")
+}
+
 
 
 //GetStateByPartialCompositeKey function can be invoked by a chaincode to query the

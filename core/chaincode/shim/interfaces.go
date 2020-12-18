@@ -353,6 +353,8 @@ type ChaincodeStubInterface interface {
 
 	GetStateWindow (startKey string, timeDuration int64) (StateQueryIteratorInterface, error)
 
+	GetCount() ([]byte, error)
+
 
 }
 

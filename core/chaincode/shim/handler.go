@@ -741,6 +741,46 @@ func (handler *Handler) handleGetTimenow(channelId string, txid string) ([]byte,
 	return nil, errors.Errorf("[%s] incorrect chaincode message %s received. Expecting %s or %s", shorttxid(responseMsg.Txid), responseMsg.Type, pb.ChaincodeMessage_RESPONSE, pb.ChaincodeMessage_ERROR)
 }
 
+
+
+
+
+func (handler *Handler) handleGetCount(channelId string, txid string) ([]byte, error) {
+	// Construct payload for GET_STATE
+	payloadBytes, _ := proto.Marshal(&pb.GetCount{})
+
+	msg := &pb.ChaincodeMessage{Type: pb.ChaincodeMessage_GET_COUNT, Payload: payloadBytes, Txid: txid, ChannelId: channelId}
+	chaincodeLogger.Debugf("[%s] Sending %s", shorttxid(msg.Txid), pb.ChaincodeMessage_GET_COUNT)
+
+	responseMsg, err := handler.callPeerWithChaincodeMsg(msg, channelId, txid)
+	if err != nil {
+		return nil, errors.WithMessage(err, fmt.Sprintf("[%s] error sending GET_TIMENOW", shorttxid(txid)))
+	}
+
+	if responseMsg.Type.String() == pb.ChaincodeMessage_RESPONSE.String() {
+		// Success response
+		chaincodeLogger.Debugf("[%s] GetCount received payload %s", shorttxid(responseMsg.Txid), pb.ChaincodeMessage_RESPONSE)
+		return responseMsg.Payload, nil
+	}
+	if responseMsg.Type.String() == pb.ChaincodeMessage_ERROR.String() {
+		// Error response
+		chaincodeLogger.Errorf("[%s] GetCount received error %s", shorttxid(responseMsg.Txid), pb.ChaincodeMessage_ERROR)
+		return nil, errors.New("Nothing found")
+	}
+
+	// Incorrect chaincode message received
+	chaincodeLogger.Errorf("[%s] Incorrect chaincode message %s received. Expecting %s or %s", shorttxid(responseMsg.Txid), responseMsg.Type, pb.ChaincodeMessage_RESPONSE, pb.ChaincodeMessage_ERROR)
+	return nil, errors.Errorf("[%s] incorrect chaincode message %s received. Expecting %s or %s", shorttxid(responseMsg.Txid), responseMsg.Type, pb.ChaincodeMessage_RESPONSE, pb.ChaincodeMessage_ERROR)
+}
+
+
+
+
+
+
+
+
+
 func (handler *Handler) createResponse(status int32, payload []byte) pb.Response {
 	return pb.Response{Status: status, Payload: payload}
 }

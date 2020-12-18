@@ -11,6 +11,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"sync"
 	"time"
+	"github.com/hyperledger/fabric/core/ledger/kvledger/timedkeys"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric/common/flogging"
@@ -48,6 +49,7 @@ type kvLedger struct {
 	stats                  *ledgerStats
 	commitHash             []byte
 	prevTime	       time.Time
+	cacheDB		       *timedkeys.TimedKeys
 }
 
 // NewKVLedger constructs new `KVLedger`
@@ -61,11 +63,12 @@ func newKVLedger(
 	bookkeeperProvider bookkeeping.Provider,
 	ccInfoProvider ledger.DeployedChaincodeInfoProvider,
 	stats *ledgerStats,
+	//cacheDB *timedkeys.TimedKeys,
 ) (*kvLedger, error) {
 	logger.Debugf("Creating KVLedger ledgerID=%s: ", ledgerID)
 	// Create a kvLedger for this chain/ledger, which encasulates the underlying
 	// id store, blockstore, txmgr (state database), history database
-	l := &kvLedger{ledgerID: ledgerID, blockStore: blockStore, historyDB: historyDB, blockAPIsRWLock: &sync.RWMutex{}, prevTime: time.Time{}}
+	l := &kvLedger{ledgerID: ledgerID, blockStore: blockStore, historyDB: historyDB, blockAPIsRWLock: &sync.RWMutex{}, prevTime: time.Time{}, cacheDB: &timedkeys.TimedKeys{}}
 
 	// Retrieves the current commit hash from the blockstore
 	var err error
@@ -444,6 +447,11 @@ func (l *kvLedger) CommitWithPvtData(pvtdataAndBlock *ledger.BlockAndPvtData, co
 			panic(errors.WithMessage(err, "Error during commit to history db"))
 		}
 	}
+	errnew:= l.cacheDB.Commit(block)
+	if errnew !=nil {
+		logger.Info("Problem creating cache db")
+	}
+
 
 	valTime, err1 := ptypes.Timestamp(block.Metadata.BlockTime)
 	if err1!= nil{
@@ -489,6 +497,11 @@ func (l *kvLedger) updateBlockStats(
 	l.stats.updateBlockstorageAndPvtdataCommitTime(blockstorageAndPvtdataCommitTime)
 	l.stats.updateStatedbCommitTime(statedbCommitTime)
 	l.stats.updateTransactionsStats(txstatsInfo)
+}
+
+
+func (l *kvLedger) GetCount() (int , error){
+	return l.cacheDB.GetCount(), nil
 }
 
 // GetMissingPvtDataInfoForMostRecentBlocks returns the missing private data information for the

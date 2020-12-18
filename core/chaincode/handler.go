@@ -234,6 +234,8 @@ func (h *Handler) handleMessageReadyState(msg *pb.ChaincodeMessage) error {
 		go h.HandleTransaction(msg, h.HandlePutStateMetadata)
 	case pb.ChaincodeMessage_GET_TIMENOW:
 		go h.HandleTransaction(msg, h.HandleGetTimeNow)
+	case pb.ChaincodeMessage_GET_COUNT:
+		go h.HandleTransaction(msg, h.HandleGetCount)
 	default:
 		return fmt.Errorf("[%s] Fabric side handler cannot handle message (%s) while in ready state", msg.Txid, msg.Type)
 	}
@@ -995,7 +997,25 @@ func (h *Handler) HandleGetTimeNow(msg *pb.ChaincodeMessage, txContext *Transact
 	return &pb.ChaincodeMessage{Type: pb.ChaincodeMessage_RESPONSE, Payload: res, Txid: msg.Txid, ChannelId: msg.ChannelId}, nil
 }
 
+func (h *Handler) HandleGetCount(msg *pb.ChaincodeMessage, txContext *TransactionContext) (*pb.ChaincodeMessage, error) {
+	getCount := &pb.GetCount{}
+	err := proto.Unmarshal(msg.Payload, getCount)
+	if err != nil {
+		return nil, errors.Wrap(err, "unmarshal failed")
+	}
 
+	var vledger ledger.PeerLedger
+	vledger = h.LedgerGetter.GetLedger(txContext.ChainID)
+	if vledger == nil {
+		return nil, errors.Errorf("failed to find ledger for channel: %s", txContext.ChainID)
+	}
+	res1,_ := vledger.GetCount()
+	res2 := strconv.Itoa(res1)
+	res := []byte(res2)
+
+	// Send response msg back to chaincode. GetState will not trigger event
+	return &pb.ChaincodeMessage{Type: pb.ChaincodeMessage_RESPONSE, Payload: res, Txid: msg.Txid, ChannelId: msg.ChannelId}, nil
+}
 
 
 
