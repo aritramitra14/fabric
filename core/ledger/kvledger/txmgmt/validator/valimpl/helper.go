@@ -9,10 +9,10 @@ package valimpl
 import (
 	"bytes"
 	"fmt"
-	"github.com/golang/protobuf/ptypes"
-	"github.com/hyperledger/fabric/protos/ledger/rwset/kvrwset"
-	"strconv"
-	"time"
+	//"github.com/golang/protobuf/ptypes"
+	//"github.com/hyperledger/fabric/protos/ledger/rwset/kvrwset"
+	//"strconv"
+	//"time"
 	"github.com/hyperledger/fabric/core/ledger"
 	"github.com/hyperledger/fabric/core/ledger/customtx"
 	"github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/privacyenabledstate"
@@ -106,14 +106,14 @@ func preprocessProtoBlock(txMgr txmgr.TxMgr,
 	txsStatInfo := []*txmgr.TxStatInfo{}
 	// Committer validator has already set validation flags based on well formed tran checks
 	txsFilter := util.TxValidationFlags(block.Metadata.Metadata[common.BlockMetadataIndex_TRANSACTIONS_FILTER])
-	var y1 string
-	valTime, err1 := ptypes.Timestamp(block.Metadata.BlockTime)
-	if err1!= nil{
-		logger.Info("Problem with block metadata")
-	} else {
-		addkey:= valTime.UnixNano()/int64(time.Millisecond)
-		y1 = strconv.FormatInt(addkey,10)
-	}
+	//var y1 string
+	//valTime, err1 := ptypes.Timestamp(block.Metadata.BlockTime)
+	//if err1!= nil{
+	//	logger.Info("Problem with block metadata")
+	//} else {
+	//	addkey:= valTime.UnixNano()/int64(time.Millisecond)
+	//	y1 = strconv.FormatInt(addkey,10)
+	//}
 	
 	for txIndex, envBytes := range block.Data.Data {
 		var env *common.Envelope
@@ -180,8 +180,8 @@ func preprocessProtoBlock(txMgr txmgr.TxMgr,
 				txsFilter.SetFlag(txIndex, peer.TxValidationCode_INVALID_WRITESET)
 				continue
 			}
-			newWriteSet,_ := addTimedWriteset(txRWSet,y1)
-			b.Txs = append(b.Txs, &internal.Transaction{IndexInBlock: txIndex, ID: chdr.TxId, RWSet: newWriteSet})
+			//newWriteSet,_ := addTimedWriteset(txRWSet,y1)
+			b.Txs = append(b.Txs, &internal.Transaction{IndexInBlock: txIndex, ID: chdr.TxId, RWSet: txRWSet})
 		}
 	}
 	return b, txsStatInfo, nil
@@ -226,7 +226,7 @@ func validateWriteset(txRWSet *rwsetutil.TxRwSet, validateKVFunc func(key string
 	return nil
 }
 
-func addTimedWriteset(txRWSet *rwsetutil.TxRwSet, stamp string) (*rwsetutil.TxRwSet, error) {
+/*func addTimedWriteset(txRWSet *rwsetutil.TxRwSet, stamp string) (*rwsetutil.TxRwSet, error) {
 	for _, nsRwSet := range txRWSet.NsRwSets {
 		pubWriteset := nsRwSet.KvRwSet
 		if pubWriteset == nil {
@@ -246,7 +246,7 @@ func addTimedWriteset(txRWSet *rwsetutil.TxRwSet, stamp string) (*rwsetutil.TxRw
 		//txRWSet.NsRwSets.KvRwSet = pubWriteset
 	}
 	return txRWSet,nil
-}
+}*/
 
 
 
