@@ -6,7 +6,7 @@ TimeFabric is a proof of concept to run time based smart contracts in Fabric. In
 
 # Instructions 
 
-- The Hyperledger Fabric 1.4.10 prereuisites should be installed
+- The Hyperledger Fabric 1.4.10 prerequisites should be installed
 - Run `make peer` command to generate the peer binary from Makefile. The binary will be generated in `./build/bin` folder in the local repo
 - Generate a new docker image from `fabric-ccenv` for chaincode compilation
 	- A sample dockerfile for generating new docker image for `fabric-ccenv` has been provided
